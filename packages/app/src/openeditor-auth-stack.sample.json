@@ -1,0 +1,7 @@
+{
+  "UserPoolClientId": "exampleID",
+  "UserPoolId": "us-east-2_example",
+  "IdentityPoolId": "us-east-2:example",
+  "UserPoolArn": "arn:aws:cognito-idp:us-east-2:1234567890:userpool/us-east-2_example",
+  "ServerlessDeploymentBucketName": "openeditor-prod-deployment-example"
+}

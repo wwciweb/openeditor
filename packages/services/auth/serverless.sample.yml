@@ -1,0 +1,171 @@
+service: ${file(../config.yml):prefix}-auth
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  output:
+    handler: scripts/output.handler
+    file: ../../app/src/${file(../config.yml):prefix}-auth-stack.json
+
+provider:
+  name: aws
+  profile: ${file(../config.yml):profiles.${self:provider.stage}}
+  region: ${opt:region, "us-east-2"}
+  stage: ${opt:stage, "dev"}
+  runtime: nodejs12.x
+  deploymentBucket:
+    name: ${file(../config.yml):prefix}-${self:provider.stage}-deployment-${file(../config.yml):suffix}
+
+resources:
+  Resources:
+    CognitoUserPool:
+      Type: AWS::Cognito::UserPool
+      Properties:
+        UserPoolName: ${file(../config.yml):prefix}-${self:custom.stage}-UserPool
+        UsernameAttributes:
+          - email
+        AutoVerifiedAttributes:
+          - email
+        Schema:
+          - Name: name
+            AttributeDataType: String
+            Mutable: true
+            Required: true
+        Policies:
+          PasswordPolicy:
+            MinimumLength: 6
+            RequireLowercase: False
+            RequireNumbers: False
+            RequireSymbols: False
+            RequireUppercase: False
+
+    CognitoUserPoolClient:
+      Type: AWS::Cognito::UserPoolClient
+      Properties:
+        ClientName: ${file(../config.yml):prefix}-${self:custom.stage}-UserPoolClient
+        UserPoolId:
+          Ref: CognitoUserPool
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+        GenerateSecret: false
+
+    CognitoIdentityPool:
+      Type: AWS::Cognito::IdentityPool
+      Properties:
+        IdentityPoolName: ${file(../config.yml):prefix} ${self:custom.stage} IdentityPool
+
+        AllowUnauthenticatedIdentities: false
+
+        CognitoIdentityProviders:
+          - ClientId:
+              Ref: CognitoUserPoolClient
+            ProviderName:
+              Fn::GetAtt: ["CognitoUserPool", "ProviderName"]
+
+    CognitoIdentityPoolRoles:
+      Type: AWS::Cognito::IdentityPoolRoleAttachment
+      Properties:
+        IdentityPoolId:
+          Ref: CognitoIdentityPool
+        Roles:
+          authenticated:
+            Fn::GetAtt: [CognitoAuthRole, Arn]
+
+    CognitoAuthRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        AssumeRolePolicyDocument:
+          Version: "2012-10-17"
+          Statement:
+            - Effect: "Allow"
+              Principal:
+                Federated: "cognito-identity.amazonaws.com"
+              Action:
+                - "sts:AssumeRoleWithWebIdentity"
+              Condition:
+                StringEquals:
+                  "cognito-identity.amazonaws.com:aud":
+                    Ref: CognitoIdentityPool
+                "ForAnyValue:StringLike":
+                  "cognito-identity.amazonaws.com:amr": authenticated
+        Policies:
+          - PolicyName: "CognitoAuthorizedPolicy"
+            PolicyDocument:
+              Version: "2012-10-17"
+              Statement:
+                - Effect: "Allow"
+                  Action:
+                    - "mobileanalytics:PutEvents"
+                    - "cognito-sync:*"
+                    - "cognito-identity:*"
+                  Resource: "*"
+
+                - Effect: "Allow"
+                  Action:
+                    - "transcribe:*"
+                  Resource: "*"
+
+                - Effect: "Allow"
+                  Action:
+                    - "execute-api:Invoke"
+                  Resource:
+                    Fn::Join:
+                      - ""
+                      - - "arn:aws:execute-api:"
+                        - Ref: AWS::Region
+                        - ":"
+                        - Ref: AWS::AccountId
+                        - ":"
+                        - Fn::ImportValue: ${file(../config.yml):prefix}-${self:custom.stage}-ApiGatewayRestApiId
+                        - "/*"
+
+                - Effect: "Allow"
+                  Action:
+                    - "s3:*"
+                  Resource:
+                    - "arn:aws:s3:::media-zznxt2bpd6cvb3xj/*"
+
+                    - Fn::Join:
+                        - ""
+                        - - Fn::ImportValue: ${file(../config.yml):prefix}-${self:custom.stage}-StorageBucketArn
+                          - "/public/*"
+                    - Fn::Join:
+                        - ""
+                        - - Fn::ImportValue: ${file(../config.yml):prefix}-${self:custom.stage}-StorageBucketArn
+                          - "/protected/"
+                          - "$"
+                          - "{cognito-identity.amazonaws.com:sub}/*"
+                    - Fn::Join:
+                        - ""
+                        - - Fn::ImportValue: ${file(../config.yml):prefix}-${self:custom.stage}-StorageBucketArn
+                          - "/private/"
+                          - "$"
+                          - "{cognito-identity.amazonaws.com:sub}/*"
+
+  Outputs:
+    UserPoolArn:
+      Value:
+        Fn::GetAtt:
+          - CognitoUserPool
+          - Arn
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-UserPoolArn
+    UserPoolId:
+      Value:
+        Ref: CognitoUserPool
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-UserPoolId
+    UserPoolClientId:
+      Value:
+        Ref: CognitoUserPoolClient
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-UserPoolClientId
+    IdentityPoolId:
+      Value:
+        Ref: CognitoIdentityPool
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-IdentityPoolId
+
+plugins:
+  - serverless-deployment-bucket
+  - "@anttiviljami/serverless-stack-output"

@@ -1,0 +1,61 @@
+service: ${file(../config.yml):prefix}-storage
+
+custom:
+  service: storage
+  stage: ${opt:stage, self:provider.stage}
+  bucketName: ${file(../config.yml):prefix}-${self:custom.stage}-storage-${file(../config.yml):suffix}
+  output:
+    handler: scripts/output.handler
+    file: ../../app/src/${file(../config.yml):prefix}-storage-stack.json
+
+provider:
+  name: aws
+  profile: ${file(../config.yml):profiles.${self:provider.stage}}
+  region: ${opt:region, "us-east-2"}
+  stage: ${opt:stage, "dev"}
+  runtime: nodejs12.x
+  deploymentBucket:
+    name: ${file(../config.yml):prefix}-${self:provider.stage}-deployment-${file(../config.yml):suffix}
+
+resources:
+  Resources:
+    StorageBucket:
+      Type: AWS::S3::Bucket
+      DeletionPolicy: Retain
+      Properties:
+        BucketName: ${self:custom.bucketName}
+        CorsConfiguration:
+          CorsRules:
+            - AllowedOrigins:
+                - "*"
+              AllowedHeaders:
+                - "*"
+              AllowedMethods:
+                - GET
+                - PUT
+                - POST
+                - DELETE
+                - HEAD
+              MaxAge: 3000
+              ExposeHeader:
+                - ETag
+
+  Outputs:
+    StorageBucketArn:
+      Value:
+        Fn::GetAtt:
+          - StorageBucket
+          - Arn
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-StorageBucketArn
+
+    StorageBucketName:
+      Value:
+        Ref: StorageBucket
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-StorageBucket
+
+plugins:
+  - serverless-pseudo-parameters
+  - serverless-deployment-bucket
+  - "@anttiviljami/serverless-stack-output"

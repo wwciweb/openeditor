@@ -1,0 +1,6 @@
+prefix: openeditor
+suffix: example
+
+profiles:
+  dev: openeditor-example
+  prod: openeditor-example

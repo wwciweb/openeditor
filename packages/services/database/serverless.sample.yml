@@ -1,0 +1,66 @@
+service: ${file(../config.yml):prefix}-database
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  tableName: ${file(../config.yml):prefix}-${self:custom.stage}-data
+
+provider:
+  name: aws
+  profile: ${file(../config.yml):profiles.${self:provider.stage}}
+  region: ${opt:region, "us-east-2"}
+  stage: ${opt:stage, "dev"}
+  runtime: nodejs12.x
+  deploymentBucket:
+    name: ${file(../config.yml):prefix}-${self:provider.stage}-deployment-${file(../config.yml):suffix}
+
+resources:
+  Resources:
+    DataTable:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: Retain
+      Properties:
+        TableName: ${self:custom.tableName}
+        AttributeDefinitions:
+          - AttributeName: PK
+            AttributeType: S
+          - AttributeName: SK
+            AttributeType: S
+          - AttributeName: parent
+            AttributeType: S
+        KeySchema:
+          - AttributeName: PK
+            KeyType: HASH
+          - AttributeName: SK
+            KeyType: RANGE
+        BillingMode: PAY_PER_REQUEST
+
+        GlobalSecondaryIndexes:
+          - IndexName: SK-index
+            KeySchema:
+              - AttributeName: SK
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+          - IndexName: parent-index
+            KeySchema:
+              - AttributeName: parent
+                KeyType: HASH
+            Projection:
+              ProjectionType: ALL
+
+  Outputs:
+    DataTableArn:
+      Value:
+        Fn::GetAtt:
+          - DataTable
+          - Arn
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-DataTableArn
+    DataTableName:
+      Value:
+        Ref: DataTable
+      Export:
+        Name: ${file(../config.yml):prefix}-${self:custom.stage}-DataTable
+
+plugins:
+  - serverless-deployment-bucket

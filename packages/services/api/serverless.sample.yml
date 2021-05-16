@@ -1,0 +1,464 @@
+service: ${file(../config.yml):prefix}
+
+package:
+  individually: true
+
+plugins:
+  - serverless-plugin-monorepo
+  - serverless-plugin-git-variables
+  - serverless-bundle
+  - serverless-offline
+  - serverless-deployment-bucket
+  # - serverless-stack-termination-protection
+  - "@anttiviljami/serverless-stack-output"
+
+custom:
+  stage: ${opt:stage, self:provider.stage}
+  execRoleArn: arn:aws:iam::1234567890:role/ecsTaskExecutionRole
+  output:
+    handler: scripts/output.handler
+    file: ../../app/src/${file(../config.yml):prefix}-stack.json
+
+provider:
+  name: aws
+  profile: ${file(../config.yml):profiles.${self:provider.stage}}
+  region: ${opt:region, "us-east-2"}
+  runtime: nodejs12.x
+  memorySize: 1024
+  timeout: 30
+  logRetentionInDays: 5
+  versionFunctions: false
+  tracing:
+    apiGateway: true
+    lambda: true
+  stage: ${opt:stage, "dev"}
+  apiName: ${self:service.name}-${self:provider.stage}
+  apiKeys:
+    - ${self:custom.stage}-import
+  deploymentBucket:
+    name: ${self:service.name}-${self:provider.stage}-deployment-${file(../config.yml):suffix}
+
+  environment:
+    TableName:
+      Fn::Join:
+        - ""
+        - - Fn::ImportValue: ${self:service}-${self:custom.stage}-DataTable
+    MediaConvertAPI: https://example.mediaconvert.us-east-2.amazonaws.com
+    MediaConvertQueue: arn:aws:mediaconvert:us-east-2:1234567890:queues/Default
+    MediaConvertRole: arn:aws:iam::1234567890:role/mediaConvertRole
+    MediaBucket: ${self:service.name}-${self:provider.stage}-storage-${file(../config.yml):suffix}
+    TaskSubnet: subnet-example
+
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
+        - dynamodb:Query
+        - dynamodb:Scan
+        - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:UpdateItem
+        - dynamodb:DeleteItem
+
+      Resource:
+        - Fn::ImportValue: ${self:service}-${self:custom.stage}-DataTableArn
+        - Fn::Join:
+            - "/"
+            - - Fn::ImportValue: ${self:service}-${self:custom.stage}-DataTableArn
+              - "index/*"
+    # - Action:
+    #     - cognito-idp:ListUsers
+    #     - cognito-idp:AdminGetUser
+    #   Resource: arn:aws:cognito-idp:us-east-2:1234567890:userpool/us-east-2_example
+    #   Effect: Allow
+    - Effect: "Allow"
+      Action:
+        - "transcribe:*"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "mediaconvert:*"
+      Resource: "*"
+    - Effect: "Allow"
+      Action:
+        - "s3:*"
+      Resource:
+        - "*"
+    - Effect: Allow
+      Action:
+        - iam:PassRole
+      Resource: ${self:provider.environment.MediaConvertRole}
+    # - Effect: "Allow"
+    #   Action:
+    #     - ecs:RunTask
+    #   Resource: "*"
+    # - Effect: Allow
+    #   Action:
+    #     - iam:PassRole
+    #   Resource: ${self:custom.execRoleArn}
+
+functions:
+  getTranscript:
+    handler: transcript.get
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: transcript/{PK}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  updateTranscript:
+    handler: transcript.put
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: transcript/{PK}
+          method: put
+          cors: true
+          authorizer: aws_iam
+
+  duplicateTranscript:
+    handler: transcript.duplicate
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: transcript/{PK}
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  reparagraphTranscript:
+    handler: transcript.reparagraph
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: reparagraph/{PK}
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  create:
+    handler: create.main
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: data
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  import:
+    handler: import.main
+    description: ${git:branch}:${git:sha1}
+    memorySize: 3008
+    timeout: 30
+    events:
+      - http:
+          path: import
+          method: post
+          cors: true
+          private: true
+
+  exportList:
+    handler: export.transcripts
+    description: ${git:branch}:${git:sha1}
+    memorySize: 3008
+    timeout: 30
+    events:
+      - http:
+          path: export
+          method: get
+          cors: true
+          private: true
+
+  exportTranscript:
+    handler: export.transcript
+    description: ${git:branch}:${git:sha1}
+    memorySize: 3008
+    timeout: 30
+    events:
+      - http:
+          path: export/{PK}
+          method: get
+          cors: true
+          private: true
+
+  # processChanges:
+  #   handler: sizes.processChanges
+  #   description: ${git:branch}:${git:sha1}
+  #   memorySize: 3008
+  #   timeout: 900
+  #   events:
+  #     - stream:
+  #         type: dynamodb
+  #         arn: arn:aws:dynamodb:us-east-2:1234567890:table/openeditor-prod-data/stream/2019-12-16T00:42:26.961
+
+  get:
+    handler: get.main
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: data/{PK}/{SK}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  list:
+    handler: list.main
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: data
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  update:
+    handler: update.main
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: data/{PK}/{SK}
+          method: put
+          cors: true
+          authorizer: aws_iam
+
+  # DEPRECATED
+  getUser:
+    handler: user.get
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: user/{sub}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  postAuth:
+    handler: user.postAuth
+    description: ${git:branch}:${git:sha1}
+
+  users:
+    handler: user.users
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: users
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  user:
+    handler: user.user
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: users/{sub}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  projects:
+    handler: user.userProjects
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: users/{sub}/projects
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  projectUsers:
+    handler: user.projectUsers
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: projects/{PK}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  # FIXME: DEPRECATED
+  getUserProjects:
+    handler: user.projects
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: user/{sub}/projects
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  joinProject:
+    handler: user.joinProject
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: users/{sub}/projects
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  leaveProject:
+    handler: user.leaveProject
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: users/{sub}/projects/{PK}
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  # FIXME: DEPRECATED
+  addUser2Project:
+    handler: user.add2project
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: user/{sub}/projects
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  transcribe:
+    handler: transcribe.transcribe
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: transcribe
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  transcode:
+    handler: transcribe.transcode
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: transcode
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  align:
+    handler: transcribe.align
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: align
+          method: post
+          cors: true
+          authorizer: aws_iam
+
+  tree:
+    handler: tree.tree
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: tree/{PK}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  children:
+    handler: tree.children
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: children/{PK}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  breadcrumbs:
+    handler: tree.breadcrumbs
+    description: ${git:branch}:${git:sha1}
+    events:
+      - http:
+          path: breadcrumbs/{PK}
+          method: get
+          cors: true
+          authorizer: aws_iam
+
+  transcribed:
+    handler: transcribe.transcribed
+    description: ${git:branch}:${git:sha1}
+    timeout: 900
+    memorySize: 3008
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-2:1234567890:${file(../config.yml):prefix}-${self:custom.stage}-transcribed
+          batchSize: 1
+
+  transcoded:
+    handler: transcribe.transcoded
+    description: ${git:branch}:${git:sha1}
+    timeout: 60
+    memorySize: 3008
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-2:1234567890:${file(../config.yml):prefix}-${self:custom.stage}-transcoded
+          batchSize: 1
+
+  aligned:
+    handler: transcribe.aligned
+    description: ${git:branch}:${git:sha1}
+    timeout: 900
+    memorySize: 3008
+    events:
+      - sqs:
+          arn: arn:aws:sqs:us-east-2:1234567890:${file(../config.yml):prefix}-${self:custom.stage}-aligned
+          batchSize: 1
+      # - s3:
+      #     bucket: ${file(../config.yml):prefix}-${self:custom.stage}-storage-${file(../config.yml):suffix}
+      #     event: s3:ObjectCreated:Put
+      #     rules:
+      #       - prefix: public/media/
+      #       - suffix: -align.json
+      #     existing: true
+
+resources:
+  - Description: >
+      ${self:service} ${git:branch}:${git:sha1}
+      ${git:message}
+  - Resources:
+      ApiGatewayRestApi:
+        Type: AWS::ApiGateway::RestApi
+        Properties:
+          Name: ${self:service}-${self:custom.stage}
+      GatewayResponseDefault4XX:
+        Type: "AWS::ApiGateway::GatewayResponse"
+        Properties:
+          ResponseParameters:
+            gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+            gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          ResponseType: DEFAULT_4XX
+          RestApiId:
+            Ref: "ApiGatewayRestApi"
+      GatewayResponseDefault5XX:
+        Type: "AWS::ApiGateway::GatewayResponse"
+        Properties:
+          ResponseParameters:
+            gatewayresponse.header.Access-Control-Allow-Origin: "'*'"
+            gatewayresponse.header.Access-Control-Allow-Headers: "'*'"
+          ResponseType: DEFAULT_5XX
+          RestApiId:
+            Ref: "ApiGatewayRestApi"
+  - Outputs:
+      ApiGatewayRestApiId:
+        Value:
+          Ref: ApiGatewayRestApi
+        Export:
+          Name: ${self:service}-${self:custom.stage}-ApiGatewayRestApiId
+      ApiGatewayRestApiRootResourceId:
+        Value:
+          Fn::GetAtt:
+            - ApiGatewayRestApi
+            - RootResourceId
+        Export:
+          Name: ${self:service}-${self:custom.stage}-ApiGatewayRestApiRootResourceId
+      Region:
+        Value: ${self:provider.region}
+        Export:
+          Name: ${self:service}-${self:custom.stage}-Region

@@ -1,0 +1,288 @@
+.ant-typography {
+  color: #152939; /* --deepSquidInk */
+}
+
+.ant-menu-item {
+  opacity: 0.5;
+}
+
+.ant-menu.ant-menu-dark .ant-menu-item-selected,
+.ant-menu-submenu-popup.ant-menu-dark .ant-menu-item-selected {
+  opacity: 1;
+  background-color: #001529;
+}
+
+.ant-pagination {
+  padding-right: 20px;
+}
+
+.ant-pagination-next a.ant-pagination-item-link {
+  display: inline-block;
+  margin-left: 4px;
+  margin-right: 20px;
+}
+
+.ant-pagination-next a + a:last-child {
+  margin-left: 10px;
+}
+
+.action-button {
+  margin-left: 4px;
+}
+
+.controls-holder {
+  padding-bottom: 16px;
+  margin-right: 16px;
+}
+
+.ant-page-header-footer {
+  padding-top: 10px;
+}
+
+.ant-slider {
+  margin: 0;
+  padding: 0;
+  position: absolute;
+  left: 7px;
+  width: calc(100% - 10px);
+  height: 20px;
+  z-index: 900;
+}
+
+.ant-slider-mark-text {
+  transform: translateX(-100%) translateY(-30px) !important;
+  font-size: 10px;
+  padding-right: 5px;
+  color: #1890ff;
+  pointer-events: none;
+}
+
+.timecode,
+.public-DraftStyleDefault-block,
+.ant-slider-mark-text,
+.toolTipContainer .ant-tooltip-content {
+  font-family: 'Fira Mono', 'PT Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+/* font-family: 'Fira Mono', monospace;
+font-family: 'Fira Sans', sans-serif;
+font-family: 'Fira Sans Condensed', sans-serif; */
+
+.toolTipContainer {
+  font-size: 12px;
+}
+
+.ant-table-tbody .timecode {
+  font-size: 12px;
+}
+
+.ant-page-header-heading-title {
+  font-size: 16px;
+}
+
+.ant-page-header-heading-tags {
+  vertical-align: text-bottom;
+}
+
+.ant-page-header-heading-tags {
+  text-transform: uppercase;
+  /* font-size: 10px; */
+  font-family: 'Fira Sans Condensed', 'PT Sans Narrow', 'PT Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.ant-tag {
+  text-transform: uppercase;
+  /* font-size: 10px; */
+  font-family: 'Fira Sans Condensed', 'PT Sans Narrow', 'PT Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  white-space: nowrap;
+  user-select: none;
+}
+
+/* editor  */
+
+article {
+  padding: 3rem 0rem;
+  margin: 0 5rem;
+}
+
+code,
+.public-DraftStyleDefault-block,
+.text {
+  font-family: 'Fira Mono', 'PT Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+p,
+.public-DraftStyleDefault-block {
+  /* width: 40em; */
+  vertical-align: baseline;
+  font-weight: 500;
+  /* color: red; */
+}
+
+.wave .public-DraftStyleDefault-block {
+  color: blue;
+}
+
+.WrapperBlock {
+  margin-bottom: 1em;
+  /* position: relative; */
+}
+
+.speaker {
+  user-select: none;
+  text-align: right;
+  font-family: 'Fira Sans Condensed', 'PT Sans Narrow', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+    'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  cursor: pointer;
+}
+
+/* audio {
+  width: 40em;
+  margin-bottom: 1em;
+} */
+
+/* section[data-editor-key] {
+  position: relative;
+} */
+
+/* section[data-editor-key]::before {
+  position: absolute;
+  top: -5px;
+  font-size: 7px;
+  content: attr(data-editor-key);
+  color: red;
+} */
+
+/* .public-DraftEditor-content[contenteditable="false"],
+.text[contenteditable="false"] {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='250' height='30' viewBox='0 0 1000 120'%3E%3Cg fill='none' stroke='%23767794' stroke-width='2.9' %3E%3Cpath d='M-500 75c0 0 125-30 250-30S0 75 0 75s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 45c0 0 125-30 250-30S0 45 0 45s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 105c0 0 125-30 250-30S0 105 0 105s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 15c0 0 125-30 250-30S0 15 0 15s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500-15c0 0 125-30 250-30S0-15 0-15s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3Cpath d='M-500 135c0 0 125-30 250-30S0 135 0 135s125 30 250 30s250-30 250-30s125-30 250-30s250 30 250 30s125 30 250 30s250-30 250-30'/%3E%3C/g%3E%3C/svg%3E");
+} */
+
+/* .Token {
+  background-color: rgb(232, 249, 253);
+} */
+
+.monospace {
+  font-family: 'Fira Mono', 'PT Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+}
+
+.WrapperBlock .timecode {
+  font-family: 'Fira Mono', 'PT Mono', Consolas, 'Liberation Mono', Menlo, Courier, monospace;
+  font-size: 12px;
+  line-height: 22px;
+  white-space: nowrap;
+  user-select: none;
+  text-align: right;
+}
+
+/* .saving .WrapperBlock .timecode {
+  color: blue;
+} */
+
+.WrapperBlock .status {
+  text-transform: uppercase;
+  font-family: 'Fira Sans Condensed', 'PT Sans Narrow', 'PT Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  white-space: nowrap;
+  user-select: none;
+}
+
+.WrapperBlock .ant-badge-status {
+  cursor: pointer;
+}
+
+.WrapperBlock .ant-badge-status-text {
+  font-size: 12px;
+  display: none;
+}
+
+.WrapperBlock:hover .ant-badge-status-text {
+  display: inline-block;
+}
+
+.WrapperBlock .status > button {
+  margin-left: 10px;
+  font-size: 10px;
+  height: 18px;
+  line-height: 1.8;
+  display: none;
+  text-transform: uppercase;
+}
+
+.WrapperBlock:hover .status > button {
+  display: inline-block;
+}
+
+.WrapperBlock .timecode .zero {
+  color: rgb(206, 206, 206);
+}
+
+.WrapperBlock .timecode .zero + .separator {
+  color: rgb(206, 206, 206);
+}
+
+.WrapperBlock .public-DraftStyleDefault-block span[data-text] {
+  color: #006dd3;
+}
+
+.WrapperBlock .public-DraftStyleDefault-block .Token span[data-text] {
+  color: inherit;
+}
+
+.editing {
+  color: orange;
+}
+
+.uppy-StatusBar {
+  margin-top: 16px;
+}
+
+.replaced {
+  text-decoration: line-through;
+  color: red;
+}
+
+.replacement {
+  /*font-style: italic;*/
+  color: blue;
+}
+
+/* .transcriptDisplay--played {
+}
+
+.transcriptDisplay--played_uncorrectable {
+} */
+
+.transcriptDisplay--played_correctable {
+  background: #ddd;
+}
+
+.transcriptDisplay--unplayed {
+  color: #cccccc;
+}
+
+.wave,
+.wave span,
+.wave div {
+  font-family: wavefont !important;
+  letter-spacing: 1px;
+  font-style: normal;
+  font-weight: 100;
+  line-height: 40px;
+  font-size: 64px;
+  /* color: #006dd3; */
+}
+
+.searchHit {
+  color: orange;
+  border-bottom: 2px solid orange;
+  background-color: navajowhite;
+}
+
+.searchHit span {
+  background-color: navajowhite;
+}

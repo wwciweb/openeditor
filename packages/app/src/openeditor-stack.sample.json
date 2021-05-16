@@ -1,0 +1,7 @@
+{
+  "ApiGatewayRestApiId": "example",
+  "Region": "us-east-2",
+  "ServiceEndpoint": "https://example.execute-api.us-east-2.amazonaws.com/prod",
+  "ApiGatewayRestApiRootResourceId": "example",
+  "ServerlessDeploymentBucketName": "openeditor-prod-deployment-example"
+}

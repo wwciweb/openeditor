@@ -1,0 +1,78 @@
+{
+  "name": "openeditor-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "license": "AGPL-3.0-only",
+  "dependencies": {
+    "@bbc/stt-align-node": "Laurian/stt-align-node#master",
+    "@sentry/browser": "^5.10.2",
+    "@uppy/react": "^1.4.1",
+    "@uppy/url": "^1.4.1",
+    "@uppy/xhr-upload": "^1.4.1",
+    "antd": "^3.26.3",
+    "aws-amplify": "^2.2.1",
+    "aws-amplify-react": "^3.1.2",
+    "aws-sdk": "^2.595.0",
+    "bs58": "^4.0.1",
+    "difflib": "^0.2.4",
+    "docx": "^4.7.1",
+    "draft-js": "^0.11.3",
+    "fast-levenshtein": "^2.0.6",
+    "js-file-download": "^0.4.9",
+    "lodash.chunk": "^4.2.0",
+    "moize": "^5.4.4",
+    "moment": "^2.24.0",
+    "moment-timezone": "^0.5.27",
+    "p-debounce": "^2.1.0",
+    "react": "^16.13.1",
+    "react-dom": "^16.13.1",
+    "react-helmet": "^5.2.1",
+    "react-moment": "^0.9.7",
+    "react-router-dom": "^5.1.2",
+    "react-timecode": "^1.1.20",
+    "react-visibility-sensor": "^5.1.1",
+    "recoil": "^0.0.10",
+    "sanitize-filename": "^1.6.3",
+    "shortid": "^2.2.15",
+    "smpte-timecode": "^1.2.3",
+    "talisman": "^0.21.0",
+    "trim-right": "^1.0.1",
+    "typedarray-to-buffer": "^3.1.5",
+    "uppy-aws-amplify": "^1.0.5",
+    "uuid": "^3.3.3",
+    "wavefont": "^1.2.2",
+    "waveform-data": "^3.1.0"
+  },
+  "scripts": {
+    "start": "REACT_APP_GIT_SHA=`git rev-parse --short HEAD` react-scripts start",
+    "build": "REACT_APP_GIT_SHA=`git rev-parse --short HEAD` react-scripts build",
+    "test": "REACT_APP_GIT_SHA=`git rev-parse --short HEAD` react-scripts test",
+    "eject": "react-scripts eject",
+    "now-build": "npm run build"
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app"
+    ],
+    "plugins": [
+      "prettier"
+    ]
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  },
+  "devDependencies": {
+    "eslint-plugin-prettier": "^3.1.2",
+    "prettier": "^1.19.1",
+    "react-scripts": "3.3.0"
+  }
+}

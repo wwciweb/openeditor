@@ -1,0 +1,16 @@
+body {
+  margin: 0;
+  padding: 0;
+  color: #152939; /* --deepSquidInk */
+  /* color: var(--deepSquidInk); */
+
+  font-family: 'Fira Sans', 'PT Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu',
+    'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+footer {
+  font-family: 'Fira Sans Condensed', 'PT Sans Narrow', 'PT Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI',
+    'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+}
